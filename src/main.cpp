@@ -22,6 +22,7 @@ int main(){
 
     Dot3d light_pos = {3, 2, 4};
     Dot3d center = {0, 0, 0};
+    Dot3d camera_pos = {0, 0, 4};
     float radius = 1;
     Color sphere_color = {255, 0, 0};
 
@@ -37,7 +38,7 @@ int main(){
         window.clear(sf::Color::Black);
 
         updateLightPos(light_pos);
-        sphere.drawSpecular(window, light_pos, {0, 0, 4});
+        sphere.drawSpecular(window, light_pos, camera_pos);
 
         window.display();
     }

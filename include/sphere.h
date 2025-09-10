@@ -35,7 +35,8 @@ class Sphere{
     bool isDotOnSphere(sf::Vector2f dot2d) const;
     float getZ(sf::Vector2f dot2d) const;
     Color ambient(Color light_color, float ambient_intensity);
-    Color diffuse(Dot3d dot, Dot3d light_pos, Color light_color, float ambient_intensity);
+    Color diffuse(Vector sphere_norm, Vector light_vec, Dot3d light_pos, Color light_color);
+    Color specular(Vector sphere_norm, Vector light_vec, Vector camera_vec, Vector reflect_vec, Color light_color, float specular_intensity);
 };
 
 #endif

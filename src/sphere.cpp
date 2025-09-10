@@ -18,16 +18,18 @@ Color Sphere::ambient(Color light_color, float ambient_intensity){
     return ambient * color;
 }
 
-Color Sphere::diffuse(Dot3d dot, Dot3d light_pos, Color light_color, float ambient_intensity){
-    Vector sphere_norm = !(dot - center);
-    Vector light_vec = !(light_pos - dot);
-
+Color Sphere::diffuse(Vector sphere_norm, Vector light_vec, Dot3d light_pos, Color light_color){
     float diff = std::max(0.0f, light_vec | sphere_norm);
     Color diffuse = diff * !light_color;
 
-    Color ambient = ambient_intensity * !light_color;
+    return diffuse * color;
+}
 
-    return (ambient + diffuse) * color;
+Color Sphere::specular(Vector sphere_norm, Vector light_vec, Vector camera_vec, Vector reflect_vec, Color light_color, float specular_intensity){
+    float spec = std::pow(std::max(camera_vec | reflect_vec, 0.f), SPECULAR_POW);
+    Color specular = specular_intensity * spec * !light_color;
+
+    return specular * color;
 }
 
 void Sphere::drawAmbient(sf::RenderWindow& window, Color light_color, float ambient_intensity){
@@ -63,7 +65,10 @@ void Sphere::drawDiffuse(sf::RenderWindow& window, Dot3d light_pos, Color light_
 
             Dot3d dot = {dot_2d.x, dot_2d.y, getZ(dot_2d)};
 
-            Color result = diffuse(dot, light_pos, light_color, ambient_intensity);
+            Vector sphere_norm = !(dot - center);
+            Vector light_vec = !(light_pos - dot);
+
+            Color result = diffuse(sphere_norm, light_vec, light_pos, light_color) + ambient(light_color, ambient_intensity);
 
             screen[size.x * y + x].color = sf::Color(int(result.x), int(result.y), int(result.z));
         }
@@ -90,15 +95,9 @@ void Sphere::drawSpecular(sf::RenderWindow& window, Dot3d light_pos, Dot3d camer
             Vector camera_vec = !(camera_pos - dot);
             Vector reflect_vec = light_vec.reflect(sphere_norm);
 
-            float diff = std::max(0.0f, light_vec | sphere_norm);
-            Color diffuse = diff * !light_color;
-
-            Color ambient = ambient_intensity * !light_color;
-
-            float spec = std::pow(std::max(camera_vec | reflect_vec, 0.f), SPECULAR_POW);
-            Color specular = specular_intensity * spec * !light_color;
-
-            Color result = (ambient + diffuse + specular) * color;
+            Color result = diffuse(sphere_norm, light_vec, light_pos, light_color) +
+                           ambient(light_color, ambient_intensity) +
+                           specular(sphere_norm, light_vec, camera_vec, reflect_vec, light_color, specular_intensity);
 
             screen[size.x * y + x].color = sf::Color(int(result.x), int(result.y), int(result.z));
         }
